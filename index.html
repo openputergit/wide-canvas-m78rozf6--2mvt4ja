@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartStore - Inventory Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .neo-box {
+            border-radius: 20px;
+            background: #1a1a1a;
+            box-shadow: 20px 20px 60px #0d0d0d,
+                       -20px -20px 60px #272727;
+        }
+        .neo-button {
+            border-radius: 10px;
+            background: #1a1a1a;
+            box-shadow: 5px 5px 10px #0d0d0d,
+                       -5px -5px 10px #272727;
+            transition: all 0.3s ease;
+        }
+        .neo-button:active {
+            box-shadow: inset 5px 5px 10px #0d0d0d,
+                       inset -5px -5px 10px #272727;
+        }
+    </style>
+</head>
+<body class="bg-[#1a1a1a] text-gray-200 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="neo-box p-6 mb-8">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold">SmartStore</h1>
+                <div class="flex space-x-4">
+                    <button class="neo-button p-2" title="Notifications">
+                        <i class="bi bi-bell text-xl"></i>
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-xs rounded-full px-2">3</span>
+                    </button>
+                    <button class="neo-button p-2" title="Settings">
+                        <i class="bi bi-gear text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="neo-box p-6">
+                <h3 class="text-gray-400 mb-2">Total Products</h3>
+                <p class="text-3xl font-bold">1,234</p>
+            </div>
+            <div class="neo-box p-6">
+                <h3 class="text-gray-400 mb-2">Low Stock Items</h3>
+                <p class="text-3xl font-bold text-yellow-500">23</p>
+            </div>
+            <div class="neo-box p-6">
+                <h3 class="text-gray-400 mb-2">Monthly Sales</h3>
+                <p class="text-3xl font-bold text-green-500">$45,678</p>
+            </div>
+            <div class="neo-box p-6">
+                <h3 class="text-gray-400 mb-2">Out of Stock</h3>
+                <p class="text-3xl font-bold text-red-500">12</p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Product Management -->
+            <div class="neo-box p-6 lg:col-span-2">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold">Inventory Management</h2>
+                    <button class="neo-button px-4 py-2 flex items-center gap-2" onclick="addProduct()">
+                        <i class="bi bi-plus-lg"></i>
+                        Add Product
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-gray-400 border-b border-gray-700">
+                                <th class="text-left py-3">Product</th>
+                                <th class="text-left py-3">Category</th>
+                                <th class="text-left py-3">Stock</th>
+                                <th class="text-left py-3">Price</th>
+                                <th class="text-left py-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productTable">
+                            <!-- Products will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Sales Chart -->
+            <div class="neo-box p-6">
+                <h2 class="text-xl font-bold mb-6">Monthly Sales</h2>
+                <canvas id="salesChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div id="addProductModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+        <div class="neo-box p-6 w-full max-w-md">
+            <h2 class="text-xl font-bold mb-4">Add New Product</h2>
+            <form id="productForm" class="space-y-4">
+                <div>
+                    <label class="block text-gray-400 mb-2">Product Name</label>
+                    <input type="text" class="w-full p-2 rounded bg-gray-800 border border-gray-700" required>
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-2">Category</label>
+                    <select class="w-full p-2 rounded bg-gray-800 border border-gray-700" required>
+                        <option value="">Select Category</option>
+                        <option value="groceries">Groceries</option>
+                        <option value="beverages">Beverages</option>
+                        <option value="snacks">Snacks</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-400 mb-2">Quantity</label>
+                        <input type="number" class="w-full p-2 rounded bg-gray-800 border border-gray-700" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 mb-2">Price ($)</label>
+                        <input type="number" step="0.01" class="w-full p-2 rounded bg-gray-800 border border-gray-700" required>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" class="neo-button px-4 py-2" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="neo-button px-4 py-2 bg-blue-600">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        const products = [
+            { name: 'Milk', category: 'Dairy', stock: 50, price: 3.99 },
+            { name: 'Bread', category: 'Bakery', stock: 30, price: 2.49 },
+            { name: 'Eggs', category: 'Dairy', stock: 100, price: 4.99 }
+        ];
+
+        // Initialize sales chart
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Sales ($)',
+                    data: [30000, 35000, 32000, 40000, 38000, 45000],
+                    borderColor: '#3b82f6',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Populate product table
+        function populateTable() {
+            const tableBody = document.getElementById('productTable');
+            tableBody.innerHTML = products.map(product => `
+                <tr class="border-b border-gray-700">
+                    <td class="py-3">${product.name}</td>
+                    <td class="py-3">${product.category}</td>
+                    <td class="py-3">${product.stock}</td>
+                    <td class="py-3">$${product.price}</td>
+                    <td class="py-3">
+                        <button class="neo-button p-2 mr-2" title="Edit">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="neo-button p-2" title="Delete">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Modal functions
+        function addProduct() {
+            document.getElementById('addProductModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('addProductModal').style.display = 'none';
+        }
+
+        // Handle form submission
+        document.getElementById('productForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            // Add product logic here
+            closeModal();
+        });
+
+        // Initialize table
+        populateTable();
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
